@@ -1,0 +1,51 @@
+{
+    "name": "numberblocks",
+    "description": "",
+    "dependencies": {
+        "device": "*",
+        "animation": "*",
+        "arcade-character-animations": "github:microsoft/arcade-character-animations#v0.0.2",
+        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.2.1",
+        "Timers": "github:microsoft/arcade-timers#v1.1.0"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "assets.json",
+        "tilemap.g.jres",
+        "tilemap.g.ts",
+        "images.g.jres",
+        "images.g.ts",
+        "custom.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "target": "1.12.51",
+        "targetId": "arcade"
+    },
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "blocksprj",
+    "palette": [
+        "#000000",
+        "#FFFFFF",
+        "#FF1414",
+        "#CFCFCF",
+        "#EFF32B",
+        "#FED716",
+        "#008751",
+        "#8EF890",
+        "#29ADFF",
+        "#95D0FF",
+        "#F27C1C",
+        "#83769C",
+        "#E0E0E0",
+        "#4F4640",
+        "#AB5236",
+        "#768156"
+    ]
+}

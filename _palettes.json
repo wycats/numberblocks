@@ -1,0 +1,28 @@
+{
+    "nextPaletteID": 2,
+    "palettes": {
+        "custom0": {
+            "id": "custom0",
+            "name": "Numberblocks",
+            "colors": [
+                "#000000",
+                "#FFFFFF",
+                "#FF1414",
+                "#CFCFCF",
+                "#EFF32B",
+                "#FED716",
+                "#008751",
+                "#8EF890",
+                "#29ADFF",
+                "#95D0FF",
+                "#F27C1C",
+                "#83769C",
+                "#E0E0E0",
+                "#4F4640",
+                "#AB5236",
+                "#768156"
+            ],
+            "custom": true
+        }
+    }
+}
