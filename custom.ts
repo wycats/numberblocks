@@ -19,11 +19,17 @@ const LOCATION = {
     [Location.Forward]: "forward"
 }
 
+const FacingLeft = platformer.PlatformerSpriteState.FacingLeft
+const FacingRight = platformer.PlatformerSpriteState.FacingRight
+const Falling = platformer.PlatformerSpriteState.Falling
+const OnGround = platformer.PlatformerSpriteState.OnGround
+const Moving = platformer.PlatformerSpriteState.Moving
+
 const TO_PREDICATE = {
-    [Location.Left]: Predicate.MovingLeft,
-    [Location.Right]: Predicate.MovingRight,
-    [Location.Forward]: Predicate.NotMoving
-}
+    [Location.Left]: [FacingLeft | Moving],
+    [Location.Right]: [FacingRight | Moving],
+    [Location.Forward]: [Falling, OnGround]
+} 
 
 //% blockId="convert_location" block="$location"
 function convertLocation(location: Location): string {
@@ -48,13 +54,15 @@ namespace numberblocks {
     //% block="assign $s to numberblock $number moving $direction"
     //% direction.shadow=convert_location
     //% advanced=true
-    export function assignDirection(s: Sprite, number: number, direction: Location) {
-        characterAnimations.loopFrames(
-            s,
-            getAnimation(number, convertLocation(direction)),
-            500,
-            characterAnimations.rule(TO_PREDICATE[direction])
-        )
+    export function assignDirection(s: platformer.PlatformerSprite, number: number, direction: Location) {
+        for (const rule of TO_PREDICATE[direction]) {
+            platformer.loopFrames(
+                s,
+                getAnimation(number, convertLocation(direction)),
+                500,
+                rule
+            )
+        }
     }
 
     /**
@@ -65,7 +73,7 @@ namespace numberblocks {
      * @param number The numberblock number, eg: 1, 2, 3
      */
     //% block="make $s be numberblock $number"
-    export function assign(s: Sprite, number: number) {
+    export function assign(s: platformer.PlatformerSprite, number: number) {
         s.setImage(helpers.getImageByName(`numberblock-${number}`));
         assignDirection(s, number, Location.Left);
         assignDirection(s, number, Location.Right);
@@ -89,7 +97,7 @@ namespace numberblocks {
     //% number.defl=1
     //% help=github:wycats/numberblocks/docs/create-numberblock
     export function createNumberblock(number: number) {
-        const sprite = sprites.create(img`...`, SpriteKind.Player)
+        const sprite = platformer.create(img`...`, SpriteKind.Player)
         sprite.ay = 200
 
         if (number !== undefined) {
