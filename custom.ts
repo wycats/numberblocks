@@ -28,7 +28,7 @@ const Moving = platformer.PlatformerSpriteState.Moving
 const TO_PREDICATE = {
     [Location.Left]: [FacingLeft | Moving],
     [Location.Right]: [FacingRight | Moving],
-    [Location.Forward]: [Falling, OnGround]
+    [Location.Forward]: [Falling | 0, OnGround | 0]
 } 
 
 //% blockId="convert_location" block="$location"
@@ -55,7 +55,9 @@ namespace numberblocks {
     //% direction.shadow=convert_location
     //% advanced=true
     export function assignDirection(s: platformer.PlatformerSprite, number: number, direction: Location) {
-        for (const rule of TO_PREDICATE[direction]) {
+        const rules = TO_PREDICATE[direction]
+
+        for (const rule of rules) {
             platformer.loopFrames(
                 s,
                 getAnimation(number, convertLocation(direction)),
