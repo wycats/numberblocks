@@ -19,19 +19,58 @@ const LOCATION = {
     [Location.Forward]: "forward"
 }
 
+const TO_PREDICATE = {
+    [Location.Left]: Predicate.MovingLeft,
+    [Location.Right]: Predicate.MovingRight,
+    [Location.Forward]: Predicate.NotMoving
+}
 
 //% blockId="convert_location" block="$location"
 function convertLocation(location: Location): string {
     return LOCATION[location];
 }
 
+
+
 /**
  * Custom blocks
  */
 //% weight=100 color=#0fbc11 icon=""
-namespace helpers {
+namespace numberblocks {
+    /**
+     * Set up a Sprite with the animations for a particular
+     * numberblock and direction.
+     *
+     * @param s The sprite object to animate
+     * @param number The numberblock number, eg: 1, 2, 3
+     * @param direction The direction of the animation
+     */
+    //% block="assign $s to numberblock $number moving $direction"
+    //% direction.shadow=convert_location
+    //% advanced=true
+    export function assignDirection(s: Sprite, number: number, direction: Location) {
+        characterAnimations.loopFrames(
+            s,
+            getAnimation(number, convertLocation(direction)),
+            500,
+            characterAnimations.rule(TO_PREDICATE[direction])
+        )
+    }
 
-
+    /**
+     * Set up a Sprite with the animations for a particular
+     * numberblock.
+     * 
+     * @param s The sprite object to animate
+     * @param number The numberblock number, eg: 1, 2, 3
+     */
+    //% block="make $s be numberblock $number"
+    export function assign(s: Sprite, number: number) {
+        s.setImage(helpers.getImageByName(`numberblock-${number}`));
+        assignDirection(s, number, Location.Left);
+        assignDirection(s, number, Location.Right);
+        assignDirection(s, number, Location.Forward);
+    }
 
     /**
      * Get an animation for a specific numberblock and direction.
@@ -46,23 +85,29 @@ namespace helpers {
         return helpers.getAnimationByName(`numberblock-${number}-${direction}`)
     }
 
-    /**
-     * TODO: describe your function here
-     * @param n describe parameter here, eg: 5
-     * @param s describe parameter here, eg: "Hello"
-     * @param e describe parameter here
-     */
-    //% block
-    export function foo(n: number, s: string, e: Location): void {
-        // Add code here
+    //% block="create numberblock || $number"
+    //% number.defl=1
+    export function createNumberblock(number: number) {
+        const sprite = sprites.create(img`...`, SpriteKind.Player)
+        sprite.ay = 200
+
+        if (number !== undefined) {
+            assign(sprite, number)
+        }
+
+        return sprite
     }
 
-    /**
-     * TODO: describe your function here
-     * @param value describe value here, eg: 5
-     */
-    //% block
-    export function fib(value: number): number {
-        return value <= 1 ? value : fib(value -1) + fib(value - 2);
+    //% block="create player: numberblock || $number"
+    //% number.defl=1
+    //% blockSetVariable=playerSprite
+    export function createPlayer(number = 1): Sprite {
+        const numberblock = createNumberblock(number);
+        scene.cameraFollowSprite(numberblock)
+        numberblocks.assign(numberblock, number)
+        controller.moveSprite(numberblock, 100, 0)
+
+        return numberblock;
     }
+
 }

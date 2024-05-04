@@ -1,6 +1,5 @@
 namespace SpriteKind {
     export const NPC = SpriteKind.create()
 }
-function animate (sprite: Sprite, number: number) {
-	
-}
+tiles.setCurrentTilemap(tilemap`level2`)
+let playerSprite = numberblocks.createPlayer(1)
