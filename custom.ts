@@ -87,7 +87,7 @@ namespace numberblocks {
 
     //% block="create numberblock || $number"
     //% number.defl=1
-    //% help=github:numberblocks/docs/create-numberblock
+    //% help=github:wycats/numberblocks/docs/create-numberblock
     export function createNumberblock(number: number) {
         const sprite = sprites.create(img`...`, SpriteKind.Player)
         sprite.ay = 200
