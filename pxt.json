@@ -5,12 +5,12 @@
     "dependencies": {
         "device": "*",
         "animation": "*",
-        "arcade-character-animations": "github:microsoft/arcade-character-animations#v0.0.2",
         "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.2.1",
         "Timers": "github:microsoft/arcade-timers#v1.1.0",
         "arcade-platformer": "github:microsoft/arcade-platformer#v0.0.9",
-        "we": "github:novawithapizza/neural-networks#c576c685a9fb3fb811eccc9a2b2fd21eb120e4f4",
-        "arcade-moving-platforms": "github:riknoll/arcade-moving-platforms#v0.0.15"
+        "arcade-moving-platforms": "github:riknoll/arcade-moving-platforms#v0.0.15",
+        "Console Overlay": "github:meeeeeeeep1/Console-Overlay#v0.1.0",
+        "arcade-tile-util": "github:microsoft/arcade-tile-util#v1.2.0"
     },
     "files": [
         "main.blocks",
@@ -22,7 +22,8 @@
         "images.g.jres",
         "images.g.ts",
         "custom.ts",
-        "docs/create-numberblock.md"
+        "docs/create-numberblock.md",
+        "hit-check.ts"
     ],
     "testFiles": [
         "test.ts"
@@ -34,7 +35,7 @@
     "supportedTargets": [
         "arcade"
     ],
-    "preferredEditor": "tsprj",
+    "preferredEditor": "blocksprj",
     "palette": [
         "#000000",
         "#FFFFFF",
