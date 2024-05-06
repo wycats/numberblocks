@@ -42,6 +42,22 @@ enum NumberblockKind {
     Player
 }
 
+namespace numberblock_kind {
+    //% shim=KIND_GET
+    //% blockId=numberblock_kind block="$kind"
+    //% kindNamespace=SpriteKind kindMemberName=kind
+    export function _numberblockKind(kind: number): number {
+        return kind;
+    }
+
+    //% isKind
+    export const NPC = NumberblockKind.NPC
+
+    //% isKind
+    export const Player = NumberblockKind.Player
+}
+
+//% blockId="convert_numberblock_kind" block="$kind=numberblock_kind"
 function convertNumberblockKind(kind: NumberblockKind): number {
     switch (kind) {
         case NumberblockKind.NPC:
@@ -239,10 +255,11 @@ namespace numberblocks {
 
         //% group="Overlaps"
         //% weight=100 draggableParameters="reporter"
-        //% blockId=hitoverlap block="on $sprite of kind $kind=spritekind overlaps $otherSprite of kind $otherKind=spritekind"
+        //% blockId=hitoverlap block="on $this overlaps $kind=numberblock_kind"
+        //% kind.shadow=convert_numberblock_kind
         //% blockGap=8
-        onOverlap(kind: number, otherKind: number, handler: (other: Numberblock) => void) {
-            sprites.onOverlap(kind, otherKind, (sprite, otherSprite) => {
+        onOverlap(kind: NumberblockKind, handler: (other: Numberblock) => void) {
+            sprites.onOverlap(this.sprite.kind(), kind, (sprite, otherSprite) => {
                 if (sprite === this.sprite) {
                     const other = Numberblock.fromSprite(otherSprite)
                     if (other) {
