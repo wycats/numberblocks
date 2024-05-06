@@ -12,15 +12,12 @@ platformer_tiles.onOverlap(SpriteKind.Player, SpriteKind.NPC, function (sprite, 
 scene.onOverlapTile(SpriteKind.Player, myTiles.tile15, function (sprite, location) {
     timer.throttle("magic-mirror", 2000, function () {
         platformer_tiles.ifAvailable(location, CollisionDirection.Right, function (available) {
-            numberblock = numberblocks.createNumberblock()
-            npcs.push(numberblock)
-            platformer_tiles.insertSprite(numberblock, available)
+            numberblock = numberblocks.createNumberblockNPC(1, available)
         })
     })
 })
-let numberblock: platformer.PlatformerSprite = null
+let numberblock: numberblocks.Numberblock = null
 let sum = 0
-let npcs: platformer.PlatformerSprite[] = []
+let playerSprite = numberblocks.createNumberblockPlayer()
+let npcs = numberblocks.createNumberblocks()
 tiles.setCurrentTilemap(tilemap`level2`)
-npcs = numberblocks.Numberblock.player()
-let playerSprite = numberblocks.createPlayer()

@@ -174,14 +174,6 @@ namespace numberblocks {
         return sprite
     }
 
-    //% block="create numberblock || $number || at $location"
-    //% number.defl=1
-    //% expandableArgumentMode="enabled"
-    //% help=github:wycats/numberblocks/docs/create-numberblock
-    //% group="Lifecycle"
-    export function createNumberblock(number = 1, location: tiles.Location = null) {
-        return _createNumberblock(number, { location, kind: SpriteKind.NPC })
-    }
 
     export function createPlayer(number = 1): Sprite {
         const numberblock = _createNumberblock(number, { kind: SpriteKind.Player });
@@ -197,14 +189,14 @@ namespace numberblocks {
     //% block="an array of numberblocks"
     //% blockSetVariable=numberblocks
     //% group="Utilities"
-    export function createNumberblocks(): platformer.PlatformerSprite[] {
+    export function createNumberblocks(): Numberblock[] {
         return []
     }
 
     //% block="numberblock"
     //% group="2.0"
     export class Numberblock {
-        static create(n: number, location: tiles.Location, kind: NumberblockKind): Numberblock {
+        static create(n: number, location: tiles.Location, kind: NumberblockKind) {
             const sprite = platformer.create(numberblocks.getImage(n), kind)
             numberblocks.assign(sprite, n)
 
@@ -212,23 +204,14 @@ namespace numberblocks {
                 sprite.setPosition(location.x, location.y)
             }
 
-            sprites.setDataNumber(sprite, "numberblock", n)
-            return new Numberblock(sprite, n)
+            const numberblock = new Numberblock(sprite, n)
+            sprite.data.numberblock = numberblock
+            return numberblock
         }
 
-        //% block="create player: numberblock || $number"
-        //% number.defl=1
-        //% blockSetVariable=playerSprite
-        //% group="Lifecycle"
-        static player(n: number,) {
-            const numberblock = Numberblock.create(n, null, NumberblockKind.Player);
-            scene.cameraFollowSprite(numberblock.sprite)
-            numberblocks.assign(numberblock.sprite, n)
-            platformer.moveSprite(numberblock.sprite, true, 100, controller.player1)
-            platformer.setFeatureEnabled(platformer.PlatformerFeatures.JumpOnAPressed, true)
-            info.setScore(n)
+        static fromSprite(sprite: Sprite): Numberblock | null {
+            return sprite.data.numberblock || null
 
-            return numberblock;
         }
 
         private _sprite: platformer.PlatformerSprite
@@ -254,6 +237,22 @@ namespace numberblocks {
             return this._numberblock
         }
 
+        //% group="Overlaps"
+        //% weight=100 draggableParameters="reporter"
+        //% blockId=hitoverlap block="on $sprite of kind $kind=spritekind overlaps $otherSprite of kind $otherKind=spritekind"
+        //% blockGap=8
+        onOverlap(kind: number, otherKind: number, handler: (other: Numberblock) => void) {
+            sprites.onOverlap(kind, otherKind, (sprite, otherSprite) => {
+                if (sprite === this.sprite) {
+                    const other = Numberblock.fromSprite(otherSprite)
+                    if (other) {
+                        handler(other)
+                    }
+                }
+            })
+        }
+
+
         //% block="destroy numberblock $this || with $effect"
         //% group="2.0"
         //% this.defl=numberblock
@@ -264,5 +263,35 @@ namespace numberblocks {
             sprites.destroy(this.sprite, effect || effects.warmRadial, 500)
         }
     }
+
+    //% block="create player: numberblock || $number"
+    //% number.defl=1
+    //% blockSetVariable=playerSprite
+    //% group="Lifecycle"
+    export function createNumberblockPlayer(n = 1) {
+        const numberblock = Numberblock.create(n, null, NumberblockKind.Player);
+        scene.cameraFollowSprite(numberblock.sprite)
+        numberblocks.assign(numberblock.sprite, n)
+        platformer.moveSprite(numberblock.sprite, true, 100, controller.player1)
+        platformer.setFeatureEnabled(platformer.PlatformerFeatures.JumpOnAPressed, true)
+        info.setScore(n)
+
+        return numberblock;
+    }
+
+
+    //% block="create numberblock npc || $n at $location"
+    //% blockSetVariable=numberblock
+    //% n.defl=1
+    //% location.shadow=variables_get location.defl=location
+    //% expandableArgumentMode="enabled"
+    //% help=github:wycats/numberblocks/docs/create-numberblock
+    //% group="Lifecycle"
+    export function createNumberblockNPC(n = 1, location: tiles.Location = null): Numberblock {
+        return Numberblock.create(n, location, NumberblockKind.NPC)
+    }
+
+
+
 }
 
