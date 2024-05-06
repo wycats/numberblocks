@@ -37,6 +37,7 @@ function convertLocation(location: Location): string {
     return LOCATION[location];
 }
 
+//% block
 enum NumberblockKind {
     NPC,
     Player
@@ -209,8 +210,6 @@ namespace numberblocks {
         return []
     }
 
-    //% block="numberblock"
-    //% group="2.0"
     export class Numberblock {
         static create(n: number, location: tiles.Location, kind: NumberblockKind) {
             const sprite = platformer.create(numberblocks.getImage(n), kind)
@@ -253,27 +252,9 @@ namespace numberblocks {
             return this._numberblock
         }
 
-        //% group="Overlaps"
-        //% weight=100 draggableParameters="reporter"
-        //% blockId=hitoverlap block="on $this overlaps $kind=numberblock_kind"
-        //% kind.shadow=convert_numberblock_kind
-        //% blockGap=8
-        onOverlap(kind: NumberblockKind, handler: (other: Numberblock) => void) {
-            sprites.onOverlap(this.sprite.kind(), kind, (sprite, otherSprite) => {
-                if (sprite === this.sprite) {
-                    const other = Numberblock.fromSprite(otherSprite)
-                    if (other) {
-                        handler(other)
-                    }
-                }
-            })
-        }
-
-
-        //% block="destroy numberblock $this || with $effect"
+        //% block="destroy numberblock $this=variables_get || with $effect"
         //% group="2.0"
         //% this.defl=numberblock
-        //% this.shadow=variables_get
         //% effect.defl=effects.warmRadial
         destroy(effect?: effects.ParticleEffect) {
             platformer.setCharacterAnimationsEnabled(this.sprite, false)
@@ -308,7 +289,23 @@ namespace numberblocks {
         return Numberblock.create(n, location, NumberblockKind.NPC)
     }
 
-
+    //% group="Overlaps"
+    //% draggableParameters="reporter"
+    //% block="when $nb=variables_get overlaps $other || $kind=convert_numberblock_kind"
+    //% blockId="nboverlap"
+    //% nb.defl="numberblock"
+    //% kind.defl=NumberblockKind.NPC
+    //% handlerStatement
+    export function onOverlap(nb: Numberblock, handler: (other: Numberblock) => void, kind?: NumberblockKind) {
+        const otherKind = kind === undefined ? NumberblockKind.NPC : kind
+        sprites.onOverlap(nb.sprite.kind(), kind, (sprite, otherSprite) => {
+            if (sprite === nb.sprite) {
+                const other = Numberblock.fromSprite(otherSprite)
+                if (other) {
+                    handler(other)
+                }
+            }
+        })
+    }
 
 }
-
