@@ -12,13 +12,11 @@ namespace platformer_tiles {
     export function insertAt(sprite: Sprite, at: tiles.Location, alignment: VerticalAlignment = VerticalAlignment.Top) {
         switch (alignment) {
             case VerticalAlignment.Top:
-                console.log(`top: loc=${at.column}:${at.row} pos=${at.x}:${at.y}`)
                 sprite.setPosition(at.x, at.y)
                 return
             case VerticalAlignment.Bottom: {
 
                 const top = at.y - sprite.image.height
-                console.log(`bottom: loc=${at.column}:${at.row} pos=${at.x}:${top}`)
                 sprite.setPosition(at.x, top)
             }
 

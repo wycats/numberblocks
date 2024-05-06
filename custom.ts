@@ -119,7 +119,7 @@ namespace numberblocks {
      * @param s The sprite object to animate
      * @param number The numberblock number, eg: 1, 2, 3
      */
-    //% block="make $s be numberblock $number"
+    //% block="make $s=variables_get be numberblock $number"
     //% group="Numberblock Numbers"
     export function assign(s: platformer.PlatformerSprite, number: number) {
         const primary = getImage(number)
@@ -212,7 +212,7 @@ namespace numberblocks {
 
     export class Numberblock {
         static create(n: number, location: tiles.Location, kind: NumberblockKind) {
-            const sprite = platformer.create(numberblocks.getImage(n), kind)
+            const sprite = platformer.create(numberblocks.getImage(n), convertNumberblockKind(kind))
             numberblocks.assign(sprite, n)
 
             if (location) {
@@ -252,6 +252,13 @@ namespace numberblocks {
             return this._numberblock
         }
 
+        //% blockCombine block="current number" group="2.0"
+        //% blockSetVariable=numberblock
+        set numberblock(n: number) {
+            this._numberblock = n
+            assign(this.sprite, n)
+        }
+
         //% block="destroy numberblock $this=variables_get || with $effect"
         //% group="2.0"
         //% this.defl=numberblock
@@ -277,6 +284,14 @@ namespace numberblocks {
         return numberblock;
     }
 
+    //% block="create numberblock npc at $location=variables_get || as $n"
+    //% n.defl=1
+    //% location.defl=location
+    //% help=github:wycats/numberblocks/docs/create-numberblock
+    //% group="Lifecycle"
+    export function createNumberblockNPCAt(location: tiles.Location, n = 1): void {
+        Numberblock.create(n, location, NumberblockKind.NPC)
+    }
 
     //% block="create numberblock npc || $n at $location"
     //% blockSetVariable=numberblock
@@ -295,10 +310,10 @@ namespace numberblocks {
     //% blockId="nboverlap"
     //% nb.defl="numberblock"
     //% kind.defl=NumberblockKind.NPC
+    //% other.defl="other"
     //% handlerStatement
-    export function onOverlap(nb: Numberblock, handler: (other: Numberblock) => void, kind?: NumberblockKind) {
-        const otherKind = kind === undefined ? NumberblockKind.NPC : kind
-        sprites.onOverlap(nb.sprite.kind(), kind, (sprite, otherSprite) => {
+    export function onOverlap(nb: Numberblock, kind: NumberblockKind, handler: (other: Numberblock) => void) {
+        platformer_tiles.onOverlap(nb.sprite.kind(), convertNumberblockKind(kind), (sprite, otherSprite) => {
             if (sprite === nb.sprite) {
                 const other = Numberblock.fromSprite(otherSprite)
                 if (other) {
