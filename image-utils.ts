@@ -4,7 +4,7 @@ enum FlipDirection {
 }
 
 //% block="Asset Utils"
-//% weight=100 color=#ff7f00 icon="\uf87c"
+//% weight=100 color=#ff7f00 icon="\uf008"
 namespace asset_utils {
     //% block="flip video $video $direction"
     //% direction.defl=FlipDirection.Horizontally

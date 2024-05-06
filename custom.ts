@@ -37,8 +37,31 @@ function convertLocation(location: Location): string {
     return LOCATION[location];
 }
 
+enum NumberblockKind {
+    NPC,
+    Player
+}
+
+function convertNumberblockKind(kind: NumberblockKind): number {
+    switch (kind) {
+        case NumberblockKind.NPC:
+            return SpriteKind.NPC;
+        case NumberblockKind.Player:
+            return SpriteKind.Player;
+    }
+}
+
 //% weight=100 color=#ff7f00 icon="\uf0c8"
 namespace numberblocks {
+
+    //% block="destroy numberblock $s || with $effect"
+    //% group="Lifecycle"
+    //% effect.defl=effects.warmRadial
+    export function destroy(s: platformer.PlatformerSprite, effect?: effects.ParticleEffect) {
+        platformer.setCharacterAnimationsEnabled(s, false)
+        sprites.destroy(s, effect || effects.warmRadial, 500)
+    }
+
     /**
      * Set up a Sprite with the animations for a particular
      * numberblock and direction.
@@ -52,14 +75,10 @@ namespace numberblocks {
     //% advanced=true
     export function assignDirection(s: platformer.PlatformerSprite, number: number, direction: Location) {
         const rules = TO_PREDICATE[direction]
+        const animation = getAnimation(number, direction)
 
         for (const rule of rules) {
-            platformer.loopFrames(
-                s,
-                getAnimation(number, convertLocation(direction)),
-                500,
-                rule
-            )
+            platformer.loopFrames(s, animation, 500, rule)
         }
     }
 
@@ -125,11 +144,13 @@ namespace numberblocks {
     //% direction.shadow=convert_location
     //% group="Utilities"
     //% advanced=true
-    export function getAnimation(number: number, direction: string): Image[] {
-        if (direction === "forward") {
+    export function getAnimation(number: number, direction: Location): Image[] {
+        if (direction === Location.Forward) {
             return [helpers.getImageByName(`numberblock-${number}`)]
+        } else if (direction === Location.Right) {
+            return helpers.getAnimationByName(`numberblock-${number}-right`)
         } else {
-            return helpers.getAnimationByName(`numberblock-${number}-${direction}`)
+            return asset_utils.flip_video(helpers.getAnimationByName(`numberblock-${number}-right`), FlipDirection.Horizontally)
         }
     }
 
@@ -162,10 +183,6 @@ namespace numberblocks {
         return _createNumberblock(number, { location, kind: SpriteKind.NPC })
     }
 
-    //% block="create player: numberblock || $number"
-    //% number.defl=1
-    //% blockSetVariable=playerSprite
-    //% group="Lifecycle"
     export function createPlayer(number = 1): Sprite {
         const numberblock = _createNumberblock(number, { kind: SpriteKind.Player });
         scene.cameraFollowSprite(numberblock)
@@ -183,4 +200,69 @@ namespace numberblocks {
     export function createNumberblocks(): platformer.PlatformerSprite[] {
         return []
     }
+
+    //% block="numberblock"
+    //% group="2.0"
+    export class Numberblock {
+        static create(n: number, location: tiles.Location, kind: NumberblockKind): Numberblock {
+            const sprite = platformer.create(numberblocks.getImage(n), kind)
+            numberblocks.assign(sprite, n)
+
+            if (location) {
+                sprite.setPosition(location.x, location.y)
+            }
+
+            sprites.setDataNumber(sprite, "numberblock", n)
+            return new Numberblock(sprite, n)
+        }
+
+        //% block="create player: numberblock || $number"
+        //% number.defl=1
+        //% blockSetVariable=playerSprite
+        //% group="Lifecycle"
+        static player(n: number,) {
+            const numberblock = Numberblock.create(n, null, NumberblockKind.Player);
+            scene.cameraFollowSprite(numberblock.sprite)
+            numberblocks.assign(numberblock.sprite, n)
+            platformer.moveSprite(numberblock.sprite, true, 100, controller.player1)
+            platformer.setFeatureEnabled(platformer.PlatformerFeatures.JumpOnAPressed, true)
+            info.setScore(n)
+
+            return numberblock;
+        }
+
+        private _sprite: platformer.PlatformerSprite
+        private _numberblock: number
+
+        constructor(
+            sprite: platformer.PlatformerSprite,
+            numberblock: number
+        ) { 
+            this._sprite = sprite
+            this._numberblock = numberblock
+        }
+
+        //% blockCombine block="platformer sprite" group="2.0"
+        //% blockSetVariable=numberblock
+        get sprite(): platformer.PlatformerSprite {
+            return this._sprite
+        }
+
+        //% blockCombine block="current number" group="2.0"
+        //% blockSetVariable=numberblock
+        get numberblock(): number {
+            return this._numberblock
+        }
+
+        //% block="destroy numberblock $this || with $effect"
+        //% group="2.0"
+        //% this.defl=numberblock
+        //% this.shadow=variables_get
+        //% effect.defl=effects.warmRadial
+        destroy(effect?: effects.ParticleEffect) {
+            platformer.setCharacterAnimationsEnabled(this.sprite, false)
+            sprites.destroy(this.sprite, effect || effects.warmRadial, 500)
+        }
+    }
 }
+
