@@ -23,7 +23,8 @@
         "images.g.ts",
         "custom.ts",
         "docs/create-numberblock.md",
-        "hit-check.ts"
+        "hit-check.ts",
+        "image-utils.ts"
     ],
     "testFiles": [
         "test.ts"
