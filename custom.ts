@@ -87,12 +87,13 @@ namespace numberblocks {
      * @param number The numberblock number, eg: 1, 2, 3
      * @param direction The direction of the animation
      */
-    //% block="assign $s to numberblock $number moving $direction"
+    //% block="assign $s to numberblock $number moving $direction || with variant $variant"
     //% direction.shadow=convert_location
+    //% variant.defl=""
     //% advanced=true
-    export function assignDirection(s: platformer.PlatformerSprite, number: number, direction: Location) {
+    export function assignDirection(s: platformer.PlatformerSprite, number: number, direction: Location, variant?: string) {
         const rules = TO_PREDICATE[direction]
-        const animation = getAnimation(number, direction)
+        const animation = getAnimation(number, direction, variant)
 
         for (const rule of rules) {
             platformer.loopFrames(s, animation, 500, rule)
@@ -119,35 +120,30 @@ namespace numberblocks {
      * @param s The sprite object to animate
      * @param number The numberblock number, eg: 1, 2, 3
      */
-    //% block="make $s=variables_get be numberblock $number"
+    //% block="make $s=variables_get be numberblock $number || with variant $variant"
     //% group="Numberblock Numbers"
-    export function assign(s: platformer.PlatformerSprite, number: number) {
-        const primary = getImage(number)
+    //% variant.defl=""
+    export function assign(s: platformer.PlatformerSprite, number: number, variant?: string) {
+        const primary = getImage(number, variant)
+        const bottom = s.bottom
 
-        realign(s, primary)
+        s.setImage(primary)
+        assignDirection(s, number, Location.Left, variant)
+        assignDirection(s, number, Location.Right, variant)
+        assignDirection(s, number, Location.Forward, variant)
 
-        assignDirection(s, number, Location.Left)
-        assignDirection(s, number, Location.Right)
-        assignDirection(s, number, Location.Forward)
-        sprites.setDataNumber(s, "numberblock", number)
+        s.bottom = bottom
 
         if (s.kind() === SpriteKind.Player) {
             info.setScore(number)
         }
     }
 
-    //% block="numberblock $number is available"
+    //% block="numberblock $number is available || with variant $variant"
     //% group="Numberblock Numbers"
-    export function isNumberblockAvailable(number: number): boolean {
-        return getImage(number) !== null
-    }
-
-    function realign(s: Sprite, image: Image) {
-        const oldHeight = s.height
-        const newHeight = image.height
-
-        const delta = oldHeight - newHeight
-        s.y += delta
+    //% variant.defl=""
+    export function isNumberblockAvailable(number: number, variant?: string): boolean {
+        return getImage(number, variant) !== null
     }
 
     /**
@@ -157,50 +153,26 @@ namespace numberblocks {
      * @param direction The direction of the animation
      * @returns An animation
      */
-    //% block="animation for numberblock $number moving $direction"
+    //% block="animation for numberblock $number moving $direction || with variant $variant"
     //% direction.shadow=convert_location
+    //% variant.defl=""
     //% group="Utilities"
     //% advanced=true
-    export function getAnimation(number: number, direction: Location): Image[] {
+    export function getAnimation(number: number, direction: Location, variant?: string): Image[] {
         if (direction === Location.Forward) {
-            return [helpers.getImageByName(`numberblock-${number}`)]
+            return [helpers.getImageByName(`numberblock-${number}${variant || ""}`)]
         } else if (direction === Location.Right) {
-            return helpers.getAnimationByName(`numberblock-${number}-right`)
+            return helpers.getAnimationByName(`numberblock-${number}${variant || ""}-right`)
         } else {
-            return asset_utils.flip_video(helpers.getAnimationByName(`numberblock-${number}-right`), FlipDirection.Horizontally)
+            return asset_utils.flip_video(helpers.getAnimationByName(`numberblock-${number}${variant || ""}-right`), FlipDirection.Horizontally)
         }
     }
 
     //% block="image for numberblock $number"
     //% group="Utilities"
     //% advanced=true
-    export function getImage(number: number): Image {
-        return helpers.getImageByName(`numberblock-${number}`)
-    }
-
-    function _createNumberblock(number: number, { location = null, kind }: { location?: tiles.Location | null, kind: number }) {
-        const sprite = platformer.create(getImage(number), kind)
-        assign(sprite, number)
-
-        if (location) {
-            sprite.setPosition(location.x, location.y)
-        }
-
-        sprites.setDataNumber(sprite, "numberblock", number)
-
-        return sprite
-    }
-
-
-    export function createPlayer(number = 1): Sprite {
-        const numberblock = _createNumberblock(number, { kind: SpriteKind.Player });
-        scene.cameraFollowSprite(numberblock)
-        numberblocks.assign(numberblock, number)
-        platformer.moveSprite(numberblock,true, 100, controller.player1)
-        platformer.setFeatureEnabled(platformer.PlatformerFeatures.JumpOnAPressed, true)
-        info.setScore(number)
-
-        return numberblock;
+    export function getImage(number: number, variant?: string): Image {
+        return helpers.getImageByName(`numberblock-${number}${variant || ""}`)
     }
 
     //% block="an array of numberblocks"
@@ -226,11 +198,11 @@ namespace numberblocks {
 
         static fromSprite(sprite: Sprite): Numberblock | null {
             return sprite.data.numberblock || null
-
         }
 
         private _sprite: platformer.PlatformerSprite
         private _numberblock: number
+        private _variant: string
 
         constructor(
             sprite: platformer.PlatformerSprite,
@@ -238,6 +210,30 @@ namespace numberblocks {
         ) { 
             this._sprite = sprite
             this._numberblock = numberblock
+            this._variant = ""
+        }
+
+        //% block="move $this to the next variant"
+        //% this.defl=numberblock
+        //% group="2.0"
+        nextVariant(): void {
+            if (this._variant === '') {
+                if (isNumberblockAvailable(this.numberblock, 'A')) {
+                    this._variant = 'A'
+                    assign(this.sprite, this.numberblock, 'A')
+                }
+                return
+            }
+
+            const nextVariant = String.fromCharCode(this._variant.charCodeAt(0) + 1);
+
+            if (isNumberblockAvailable(this.numberblock, nextVariant)) {
+                this._variant = nextVariant
+                assign(this.sprite, this.numberblock, nextVariant)
+            } else {
+                this._variant = ''
+                assign(this.sprite, this.numberblock)
+            }
         }
 
         //% blockCombine block="platformer sprite" group="2.0"
@@ -255,8 +251,11 @@ namespace numberblocks {
         //% blockCombine block="current number" group="2.0"
         //% blockSetVariable=numberblock
         set numberblock(n: number) {
-            this._numberblock = n
-            assign(this.sprite, n)
+            if (this._numberblock !== n) {
+                this._numberblock = n
+                assign(this.sprite, n)
+
+            }
         }
 
         //% block="destroy numberblock $this=variables_get || with $effect"

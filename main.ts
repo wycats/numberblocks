@@ -1,6 +1,9 @@
 namespace SpriteKind {
     export const NPC = SpriteKind.create()
 }
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    playerSprite.nextVariant()
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile13`, function (sprite, location) {
     timer.throttle("magic-mirror", 2000, function () {
         platformer_tiles.ifAvailable(location, CollisionDirection.Right, function (available) {
@@ -16,6 +19,8 @@ numberblocks.onPlayerOverlap(function (player2, numberblock) {
     }
 })
 let sum = 0
-let playerSprite = numberblocks.createNumberblockPlayer()
+let playerSprite: numberblocks.Numberblock = null
+playerSprite = numberblocks.createNumberblockPlayer()
 let npcs = numberblocks.createNumberblocks()
 tiles.setCurrentTilemap(tilemap`level2`)
+console.consoleOverlay.consoleDisplay(true)
