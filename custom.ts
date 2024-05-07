@@ -269,8 +269,8 @@ namespace numberblocks {
         }
     }
 
-    //% block="create player: numberblock || $number"
-    //% number.defl=1
+    //% block="create numberblock player || $n"
+    //% n.defl=1
     //% blockSetVariable=playerSprite
     //% group="Lifecycle"
     export function createNumberblockPlayer(n = 1) {
@@ -281,8 +281,11 @@ namespace numberblocks {
         platformer.setFeatureEnabled(platformer.PlatformerFeatures.JumpOnAPressed, true)
         info.setScore(n)
 
+        player = numberblock
         return numberblock;
     }
+
+    let player: Numberblock | null
 
     //% block="create numberblock npc at $location=variables_get || as $n"
     //% n.defl=1
@@ -323,4 +326,18 @@ namespace numberblocks {
         })
     }
 
+    //% group="Overlaps"
+    //% draggableParameters="reporter"
+    //% block="when $player overlaps $numberblock"
+    //% blockId="nbplayeroverlap"
+    export function onPlayerOverlap(handler: (player: Numberblock, numberblock: Numberblock) => void) {
+        platformer_tiles.onOverlap(SpriteKind.Player, SpriteKind.NPC, (sprite, otherSprite) => {
+            if (sprite === player.sprite) {
+                const other = Numberblock.fromSprite(otherSprite)
+                if (other) {
+                    handler(player, other)
+                }
+            }
+        })
+    }
 }

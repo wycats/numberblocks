@@ -36,7 +36,7 @@ namespace platformer_tiles {
     //% block="insert sprite $sprite at tile $tile || aligned $aligned"
     //% aligned.defl=VerticalAlignment.Bottom
     export function insertSprite(sprite: Sprite, tile: tiles.Location, aligned: VerticalAlignment = VerticalAlignment.Bottom): void {
-        sprite.left = tile.left
+        sprite.right = tile.right
 
         switch (aligned) {
             case VerticalAlignment.Top:
